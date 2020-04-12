@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Canvas Riley Image</title>
+</head>
+
+<body>
+    <button id="give-permission">Click to get the permission for IOS.</button>
+    <canvas id="c"></canvas>
+
+    <script>
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+
+        window.addEventListener("load", () => {
+            const start = new Date().getMilliseconds();
+            draw(0);
+            const rendered = new Date().getMilliseconds();
+
+            const time = rendered - start;
+            console.log("Time taken to load page : " + time + " milliseconds");
+        });
+
+        function drawLines() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            function drawShapes() {
+                for (i = canvas.width; i > 0; i--) {
+                    color = (i % 2 == 0 ? "white" : "black");
+                    drawShape(i, i * 2, color);
+                }
+            }
+
+            function drawShape(size, angle, color) {
+                ctx.beginPath();
+                size = size * 12;
+                for (j = 0; j < 3; j++) {
+                    angle += 120;
+                    a = angle * Math.PI / 180;
+                    x = size * Math.sin(a);
+                    y = size * Math.cos(a);
+                    ctx.lineTo(x, y);
+                }
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+            drawShapes();
+        }
+
+        drawLines();
+
+        function requestDeviceMotion() {
+            if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+                DeviceMotionEvent.requestPermission()
+                    .then(response => {
+                        if (response == "granted") {
+                            window.addEventListener("devicemotion", handleMotionEvent, true);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                window.addEventListener("devicemotion", handleMotionEvent, true);
+            }
+            alert("Device Motion enabled.")
+        }
+        document.getElementById("give-permission").onclick = requestDeviceMotion;
+
+        window.addEventListener('resize', () => {
+            drawLines();
+        });
+
+        function handleMotionEvent(event) {
+            var xvar = event.accelerationIncludingGravity.x;
+            if (xvar === null) {
+                xvar = 0;
+            }
+            else {
+                xvar *= 50;
+            }
+            window.requestAnimationFrame(function () { draw(xvar); });
+        }
+
+        function draw(xvar) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.translate((canvas.width / 2) + xvar, (canvas.height / 2) + xvar);
+            function drawShapes() {
+                for (i = canvas.width; i > 0; i--) {
+                    color = (i % 2 == 0 ? "white" : "black");
+                    drawShape(i, i * 2, color, xvar);
+                }
+            }
+
+            function drawShape(size, angle, color, xvar) {
+                ctx.beginPath();
+                size = size * 16;
+                for (j = 0; j < 3; j++) {
+                    angle += 120;
+                    a = angle * Math.PI / 180;
+                    x = size * Math.cos(a);
+                    y = size * Math.sin(a);
+                    ctx.lineTo(x + xvar, y + xvar);
+                }
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+            drawShapes();
+        }
+    </script>
+</body>
+
+</html>
